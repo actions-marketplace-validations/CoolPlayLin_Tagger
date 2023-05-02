@@ -5,7 +5,7 @@ import { Octokit } from "@octokit/rest";
 import * as fs from "fs";
 
 var __version__: string = "0.0.1";
-
+var debug = core.getBooleanInput('debug')
 var Tag: Array<string> = ["issue", "pull_request"];
 var github = new Octokit({
   auth: core.getInput("repo-token"),
@@ -65,12 +65,6 @@ async function get_config(
       type: input.type,
       indeterminate_tag: input.indeterminate_tag,
     };
-
-    return {
-      templates: [],
-      indeterminate_tag: "",
-      type: "",
-    };
   }
 }
 
@@ -115,18 +109,26 @@ class Tagger {
   tag(title: string) {
     const labelsToAdd = [];
     const labelConditions = this.config.templates;
-
+    if (debug) {
+      console.log(labelConditions)
+    }
     // Add tags based on conditions
     for (const { tag, keywords } of labelConditions) {
       for (const keyword of keywords) {
         if (title.includes(keyword)) {
+          if (debug) {
+            console.log(`${title} contains ${tag} keywords ${keyword} to allow inclusion in the list`)
+          }
           labelsToAdd.push(tag);
           break;
+        } else if (debug) {
+          console.log(`${title} does not contain the ${tag} keyword ${keyword}`)
         }
       }
     }
 
     if (labelsToAdd.length == 0) {
+      console.log(`This title does not contain any institutional tags, allowing the default tag ${this.config.indeterminate_tag} to be added`)
       labelsToAdd.push(this.config.indeterminate_tag);
     }
 

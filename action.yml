@@ -20,6 +20,10 @@ inputs:
     description: 'The label used when all labels do not match'
     required: false
     default: 'triage-needed'
+  debug:
+    description: "Only Use for develop"
+    required: false
+    default: 'false'
 
 runs:
   using: 'node16'
