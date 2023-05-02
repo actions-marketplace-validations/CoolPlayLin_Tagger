@@ -1,5 +1,8 @@
-name: "tagger"
+name: "useful-tagger"
 description: "A practical issue tagging program"
+branding:
+  icon: award
+  color: green
 author: 'CoolPlayLin'
 inputs:
   repo-token:
@@ -13,7 +16,7 @@ inputs:
     description: 'The path to the configuration file'
     required: false
     default: ""
-  
+
 runs:
   using: 'node16'
   main: 'dist/index.js'

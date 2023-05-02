@@ -55,17 +55,18 @@ function get_config() {
         }
       });
   } else if (typeof input.path == "string") {
-    var template = JSON.parse(fs.readFileSync(input.path, 'utf-8'))
+    // Read configuration file
+    var template = JSON.parse(fs.readFileSync(input.path, "utf-8"));
   }
 
-  let config:t.config = {
+  let config: t.config = {
     templates: template,
-    type: input.type
-  }
+    type: input.type,
+  };
 
-  return config
+  return config;
 }
 
 export function main() {
-    var cfg = get_config()
+  var cfg = get_config();
 }
