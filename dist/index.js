@@ -12045,166 +12045,128 @@ var github = __nccwpck_require__(5438);
 var core = __nccwpck_require__(2186);
 // EXTERNAL MODULE: ./node_modules/@octokit/rest/dist-node/index.js
 var dist_node = __nccwpck_require__(5375);
-// EXTERNAL MODULE: external "fs"
-var external_fs_ = __nccwpck_require__(7147);
 ;// CONCATENATED MODULE: ./src/tagger.ts
 
 
 
-
-var __version__ = "0.0.1";
-var Tag = ["issue", "pull_request"];
+var run = ["issue", "pull_request"];
 var tagger_github = new dist_node/* Octokit */.v({
     auth: core.getInput("repo-token"),
-    baseUrl: "https://api.github.com",
-    userAgent: `Tagger ${__version__}`,
 });
-function get_config(type, path, indeterminate_tag) {
-    const input = {
-        type: type,
-        path: path,
-        indeterminate_tag: indeterminate_tag,
+function get_inputs() {
+    let data = {
+        type: core.getInput("type"),
+        path: core.getInput("path"),
+        default_tag: core.getInput("indeterminate-tag"),
     };
-    // Verify Value
-    if (!Boolean(input.path)) {
-        input.path = false;
+    return data;
+}
+function tags(title, templates) {
+    const tagsToAdd = [];
+    // Add tags based on conditions
+    for (const { tag, keywords } of templates.tags) {
+        for (const keyword of keywords) {
+            if (title.includes(keyword)) {
+                tagsToAdd.push(tag);
+                break;
+            }
+        }
     }
-    if (input.type == "pr") {
-        input.type = "pull_request";
+    if (tagsToAdd.length == 0) {
+        tagsToAdd.push("triage-needed");
     }
-    if (!Tag.includes(input.type)) {
-        let error = Error("type is neither an issue nor a pull_request");
-        throw error;
+    return tagsToAdd;
+}
+async function get_template(type, path, default_tag) {
+    // Get tag data
+    if (Boolean(path)) {
+        fetch(path)
+            .then((Response) => Response.json())
+            .then((tag_data) => {
+            return {
+                tags: tag_data,
+                type: type,
+                default_tag: default_tag,
+            };
+        });
     }
-    // Automatically generate configuration file (path not specified)
-    if (!input.path) {
-        tagger_github.rest.issues
+    else {
+        await tagger_github.rest.issues
             .listLabelsForRepo({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
         })
-            .then((labels) => {
-            const tags = labels.data.map(function (obj) {
+            .then((data) => {
+            let tags = data.data.map(function (obj) {
                 return obj.name;
             });
-            var template = [];
-            for (let label of tags) {
-                template.push({
-                    tag: label,
-                    keywords: [label],
+            let tag_data = [];
+            for (let tag of tags) {
+                tag_data.push({
+                    tag: tag,
+                    keywords: [tag],
                 });
             }
+            return {
+                tags: tag_data,
+                type: type,
+                default_tag: default_tag,
+            };
         });
     }
-    else if (typeof input.path == "string") {
-        // Read configuration file
-        var template = JSON.parse(external_fs_.readFileSync(input.path, "utf-8"));
-    }
-    let config = {
-        templates: template,
-        type: input.type,
-        indeterminate_tag: input.indeterminate_tag,
+    return {
+        tags: [],
+        type: "",
+        default_tag: "",
     };
-    return config;
-}
-function get_labels(owner, repo, issue_number) {
-    if (typeof issue_number == "number") {
-        tagger_github.rest.issues
-            .get({
-            owner: owner,
-            repo: repo,
-            issue_number: issue_number,
-        })
-            .then((obj) => {
-            return obj.data.labels.map(function (tag) {
-                if (typeof tag == "string") {
-                    return tag;
-                }
-                else {
-                    return tag.name;
-                }
-            });
-        });
-    }
-    else {
-        let error = TypeError;
-        throw error;
-    }
-    return [];
-}
-class Tagger {
-    config;
-    labels;
-    constructor(config, labels) {
-        this.config = config;
-        this.labels = labels;
-    }
-    pr = github.context.payload.pull_request;
-    tag(title) {
-        const labelsToAdd = [];
-        const labelConditions = this.config.templates;
-        // Add tags based on conditions
-        for (const { tag, keywords } of labelConditions) {
-            for (const keyword of keywords) {
-                if (title.includes(keyword)) {
-                    labelsToAdd.push(tag);
-                    break;
-                }
-            }
-        }
-        if (labelsToAdd.length == 0) {
-            labelsToAdd.push(this.config.indeterminate_tag);
-        }
-        return labelsToAdd;
-    }
-    issue_label() {
-        let issue = github.context.payload.issue;
-        // Add tags
-        if (typeof issue?.number == "number") {
-            tagger_github.rest.issues.addLabels({
-                owner: github.context.repo.owner,
-                repo: github.context.repo.repo,
-                issue_number: issue?.number,
-                labels: this.tag(issue.title),
-            });
-        }
-    }
-    pr_label() {
-        let pr = github.context.payload.pull_request;
-        // Add tags
-        if (typeof pr?.number == "number") {
-            tagger_github.rest.issues.addLabels({
-                owner: github.context.repo.owner,
-                repo: github.context.repo.repo,
-                issue_number: pr?.number,
-                labels: this.tag(pr.title),
-            });
-        }
-    }
 }
 function main() {
-    try {
-        let cfg = get_config(core.getInput("type").toLowerCase(), core.getInput("path"), core.getInput("indeterminate_tag"));
-        let labels = get_labels(github.context.repo.owner, github.context.repo.repo, github.context.payload.issue?.number);
-        const tagger = new Tagger(cfg, labels);
-        switch (cfg.type) {
-            case "pull_request":
-                tagger.pr_label();
+    let data = get_inputs();
+    get_template(data.type, data.path, data.default_tag).then((obj) => {
+        switch (obj.type) {
+            case run[0]:
+                const { issue } = github.context.payload;
+                if (typeof issue?.number == "number") {
+                    tagger_github.rest.issues.addLabels({
+                        owner: github.context.repo.owner,
+                        repo: github.context.repo.repo,
+                        issue_number: issue.number,
+                        labels: tags(issue.title, obj),
+                    });
+                }
+                else {
+                    let error = TypeError("context.payload.issue?.number is undefined");
+                    throw error;
+                }
                 break;
-            case "issue":
-                tagger.issue_label();
+            case run[1]:
+                const { pull_request } = github.context.payload;
+                if (typeof pull_request?.number == "number") {
+                    tagger_github.rest.issues.addLabels({
+                        owner: github.context.repo.owner,
+                        repo: github.context.repo.repo,
+                        issue_number: pull_request?.number,
+                        labels: tags(pull_request.title, obj),
+                    });
+                }
+                else {
+                    let error = TypeError("context.payload.pull_request?.number is undefined");
+                    throw error;
+                }
                 break;
         }
-    }
-    catch (error) {
-        core.error(error);
-        core.setFailed(error.message);
-    }
+    });
 }
 
 ;// CONCATENATED MODULE: ./src/main.ts
 
-main();
+
+try {
+    main();
+}
+catch (error) {
+    (0,core.setFailed)(error);
+}
 
 })();
 
