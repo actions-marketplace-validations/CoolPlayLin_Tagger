@@ -66,7 +66,11 @@ function get_config(type: string, path: string) {
   return config;
 }
 
-function get_labels(owner: string, repo: string, issue_number: number | undefined) {
+function get_labels(
+  owner: string,
+  repo: string,
+  issue_number: number | undefined
+) {
   if (typeof issue_number == "number") {
     github.rest.issues
       .get({
@@ -84,8 +88,8 @@ function get_labels(owner: string, repo: string, issue_number: number | undefine
         });
       });
   } else {
-    let error = TypeError
-    throw error
+    let error = TypeError;
+    throw error;
   }
 }
 export function main() {
