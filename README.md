@@ -10,11 +10,11 @@ A useful tool for tagging issues and pull_request
 [
   {
     "tag": "bug",
-    "keyword": ["bug"]
+    "keywords": ["bug"]
   },
   {
     "tag": "enhancement",
-    "keyword": ["documentation"]
+    "keywords": ["documentation"]
   },
   {
     "tag": "help wanted",

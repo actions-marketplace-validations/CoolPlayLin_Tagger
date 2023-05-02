@@ -1,3 +1,3 @@
-import { main } from "./tagger";
+import { main } from './tagger'
 
 main();
