@@ -67,8 +67,8 @@ async function get_config(
   return {
     template: [],
     type: "",
-    indeterminate_tag: ""
-  }
+    indeterminate_tag: "",
+  };
 }
 
 // function get_labels(
