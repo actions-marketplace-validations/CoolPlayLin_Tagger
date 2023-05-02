@@ -16,6 +16,10 @@ inputs:
     description: 'The path to the configuration file'
     required: false
     default: ""
+  indeterminate-tag:
+    description: 'The label used when all labels do not match'
+    required: false
+    default: 'triage-needed'
 
 runs:
   using: 'node16'

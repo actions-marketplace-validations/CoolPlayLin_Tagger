@@ -36,8 +36,9 @@ permission:
 
 ## Inputs
 
-| Arguments  | Description                                    | Default                | Require | Limit                     |
-| ---------- | ---------------------------------------------- | ---------------------- | ------- | ------------------------- |
-| repo-token | The GitHub token used to manage labels         | `secrets.GITHUB_TOKEN` | No      |                           |
-| type       | Determine whether to tag pull_request or issue |                        | Yes     | `pull_request` or `issue` |
-| path       | The path to the configuration file             |                        | No      |                           |
+| Arguments         | Description                                    | Default                | Require | Limit                     |
+| ----------------- | ---------------------------------------------- | ---------------------- | ------- | ------------------------- |
+| repo-token        | The GitHub token used to manage labels         | `secrets.GITHUB_TOKEN` | No      |                           |
+| type              | Determine whether to tag pull_request or issue |                        | Yes     | `pull_request` or `issue` |
+| path              | The path to the configuration file             |                        | No      |                           |
+| indeterminate-tag | The label used when all labels do not match    | `triage-needed`        | No      |                           |

@@ -1,16 +1,18 @@
 export interface inputs {
   type: string;
   path: boolean | string;
+  indeterminate_tag: string
 }
 
 export interface template {
   tag: string;
-  keyword: Array<string>;
+  keywords: Array<string>;
 }
 
 export interface config {
-  templates: inputs[];
+  templates: template[];
   type: string;
+  indeterminate_tag: string
 }
 
 export interface label {
