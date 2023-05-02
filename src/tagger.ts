@@ -13,9 +13,8 @@ var github = new Octokit({
   userAgent: `Tagger ${__version__}`,
 });
 declare global {
-  let cfg: any
+  let cfg: any;
 }
-
 
 async function get_config(
   type: string,
@@ -42,7 +41,7 @@ async function get_config(
   if (!input.path) {
     var labels = await github.rest.issues.listLabelsForRepo({
       owner: context.repo.owner,
-      repo: context.repo.repo
+      repo: context.repo.repo,
     });
     var tags = labels.data.map(function (obj) {
       return obj.name;
@@ -70,9 +69,9 @@ async function get_config(
     return {
       templates: [],
       indeterminate_tag: "",
-      type: ""
-    }
-}
+      type: "",
+    };
+  }
 }
 
 function get_labels(
@@ -168,7 +167,7 @@ export function main() {
       core.getInput("path"),
       core.getInput("indeterminate_tag")
     ).then((obj) => {
-        cfg = obj
+      cfg = obj;
     });
     let labels = get_labels(
       context.repo.owner,
