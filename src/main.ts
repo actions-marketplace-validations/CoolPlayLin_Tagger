@@ -1,8 +1,8 @@
-import { main } from './tagger'
-import {setFailed} from "@actions/core";
+import { main } from "./tagger";
+import { setFailed } from "@actions/core";
 
 try {
-    main()
+  main();
 } catch (error: any) {
-    setFailed(error)
+  setFailed(error);
 }

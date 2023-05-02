@@ -92,23 +92,23 @@ export function main() {
   let data = get_inputs();
   get_template(data.type, data.path, data.default_tag).then((obj) => {
     switch (obj.type) {
-      case run[0]: 
-      const {issue} = context.payload
-      if (typeof issue?.number == "number"){
-        github.rest.issues.addLabels({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          issue_number: issue.number,
-          labels: tags(issue.title, obj),
-        });
-      } else {
-        let error = TypeError("context.payload.issue?.number is undefined")
-        throw error
-      }
-      break
+      case run[0]:
+        const { issue } = context.payload;
+        if (typeof issue?.number == "number") {
+          github.rest.issues.addLabels({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: issue.number,
+            labels: tags(issue.title, obj),
+          });
+        } else {
+          let error = TypeError("context.payload.issue?.number is undefined");
+          throw error;
+        }
+        break;
       case run[1]:
-        const {pull_request} = context.payload
-        if (typeof pull_request?.number == "number"){
+        const { pull_request } = context.payload;
+        if (typeof pull_request?.number == "number") {
           github.rest.issues.addLabels({
             owner: context.repo.owner,
             repo: context.repo.repo,
@@ -116,10 +116,12 @@ export function main() {
             labels: tags(pull_request.title, obj),
           });
         } else {
-          let error = TypeError("context.payload.pull_request?.number is undefined")
-          throw error
+          let error = TypeError(
+            "context.payload.pull_request?.number is undefined"
+          );
+          throw error;
         }
-        break
+        break;
     }
   });
 }
