@@ -1,7 +1,7 @@
 export interface inputs {
   type: string;
   path: boolean | string;
-  indeterminate_tag: string
+  indeterminate_tag: string;
 }
 
 export interface template {
@@ -12,7 +12,7 @@ export interface template {
 export interface config {
   templates: template[];
   type: string;
-  indeterminate_tag: string
+  indeterminate_tag: string;
 }
 
 export interface label {
