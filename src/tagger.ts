@@ -13,12 +13,7 @@ var github = new Octokit({
   userAgent: `Tagger ${__version__}`,
 });
 
-function get_input() {
-  // Get Value
-  const input: t.inputs = {
-    type: core.getInput("type").toLowerCase(),
-    path: core.getInput("path"),
-  };
+function get_input(input: t.inputs) {
   // Verify Value
   if (!Boolean(input.path)) {
     input.path = false;
@@ -33,8 +28,12 @@ function get_input() {
   return input;
 }
 
-function get_config() {
-  var input = get_input();
+function get_config(type: string, path: string) {
+  const inputs: t.inputs = {
+    type: type,
+    path: path,
+  };
+  var input = get_input(inputs);
   // Automatically generate configuration file (path not specified)
   if (!input.path) {
     github.rest.issues
@@ -67,6 +66,36 @@ function get_config() {
   return config;
 }
 
+function get_labels(owner: string, repo: string, issue_number: number | undefined) {
+  if (typeof issue_number == "number") {
+    github.rest.issues
+      .get({
+        owner: owner,
+        repo: repo,
+        issue_number: issue_number,
+      })
+      .then((obj) => {
+        return obj.data.labels.map(function (tag) {
+          if (typeof tag == "string") {
+            return tag;
+          } else {
+            return tag.name;
+          }
+        });
+      });
+  } else {
+    let error = TypeError
+    throw error
+  }
+}
 export function main() {
-  var cfg = get_config();
+  let cfg = get_config(
+    core.getInput("type").toLowerCase(),
+    core.getInput("path")
+  );
+  let labels = get_labels(
+    context.repo.owner,
+    context.repo.repo,
+    context.payload.issue?.number
+  );
 }
