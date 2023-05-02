@@ -26,10 +26,10 @@ A useful tool for tagging issues and pull_request
 - Permission
 
 ```yml
-permission:
-  pull_request: write
-  issue: write
-  context: read
+permissions:
+  pull-requests: write
+  issues: write
+  contents: read
 ```
 
 > Note: If you don't specify a path, then it will automatically generate a configuration file, and the key and keyword of the configuration file are all tags
@@ -38,7 +38,7 @@ permission:
 
 | Arguments         | Description                                    | Default                | Require | Limit                     |
 | ----------------- | ---------------------------------------------- | ---------------------- | ------- | ------------------------- |
-| repo-token        | The GitHub token used to manage labels         | `secrets.GITHUB_TOKEN` | No      |                           |
+| repo-token        | The GitHub token used to manage labels         | ` github.token` | No      |                           |
 | type              | Determine whether to tag pull_request or issue |                        | Yes     | `pull_request` or `issue` |
 | path              | The path to the configuration file             |                        | No      |                           |
 | indeterminate-tag | The label used when all labels do not match    | `triage-needed`        | No      |                           |
