@@ -1,0 +1,19 @@
+name: "tagger"
+description: "A practical issue tagging program"
+author: 'CoolPlayLin'
+inputs:
+  repo-token:
+    description: 'The GitHub token used to manage labels'
+    required: false
+    default: ${{ secrets.GITHUB_TOKEN }}
+  type:
+    description: 'Determine whether to tag pull_request or issue'
+    required: true
+  path:
+    description: 'The path to the configuration file'
+    required: false
+    default: ""
+  
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
