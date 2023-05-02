@@ -12,12 +12,16 @@ var github = new Octokit({
   baseUrl: "https://api.github.com",
   userAgent: `Tagger ${__version__}`,
 });
+declare global {
+  let cfg: any
+}
 
-function get_config(
+
+async function get_config(
   type: string,
   path: string,
   indeterminate_tag: string
-): t.config {
+) {
   const input: t.inputs = {
     type: type,
     path: path,
@@ -36,35 +40,39 @@ function get_config(
   }
   // Automatically generate configuration file (path not specified)
   if (!input.path) {
-    github.rest.issues
-      .listLabelsForRepo({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-      })
-      .then((labels) => {
-        const tags = labels.data.map(function (obj) {
-          return obj.name;
-        });
-        var template: t.template[] = [];
-        for (let label of tags) {
-          template.push({
-            tag: label,
-            keywords: [label],
-          });
-        }
+    var labels = await github.rest.issues.listLabelsForRepo({
+      owner: context.repo.owner,
+      repo: context.repo.repo
+    });
+    var tags = labels.data.map(function (obj) {
+      return obj.name;
+    });
+    var template = [];
+    for (let tag of tags) {
+      template.push({
+        tag: tag,
+        keywords: [tag],
       });
+    }
+    return {
+      templates: template,
+      type: input.type,
+      indeterminate_tag: input.indeterminate_tag,
+    };
   } else if (typeof input.path == "string") {
     // Read configuration file
-    var template = JSON.parse(fs.readFileSync(input.path, "utf-8"));
-  }
+    return {
+      templates: JSON.parse(fs.readFileSync(input.path, "utf-8")),
+      type: input.type,
+      indeterminate_tag: input.indeterminate_tag,
+    };
 
-  let config: t.config = {
-    templates: template,
-    type: input.type,
-    indeterminate_tag: input.indeterminate_tag,
-  };
-
-  return config;
+    return {
+      templates: [],
+      indeterminate_tag: "",
+      type: ""
+    }
+}
 }
 
 function get_labels(
@@ -155,11 +163,13 @@ class Tagger {
 
 export function main() {
   try {
-    let cfg = get_config(
+    get_config(
       core.getInput("type").toLowerCase(),
       core.getInput("path"),
       core.getInput("indeterminate_tag")
-    );
+    ).then((obj) => {
+        cfg = obj
+    });
     let labels = get_labels(
       context.repo.owner,
       context.repo.repo,
