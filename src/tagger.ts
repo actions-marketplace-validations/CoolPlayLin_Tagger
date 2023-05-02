@@ -92,14 +92,33 @@ function get_labels(
     throw error;
   }
 }
+
+class tagger {
+  private config
+  private labels
+
+  constructor (config: t.config, labels: t.label[]){
+    this.config = config
+    this.labels = labels
+  }
+
+  issue_label() {}
+  pr_label(){}
+}
+
 export function main() {
-  let cfg = get_config(
-    core.getInput("type").toLowerCase(),
-    core.getInput("path")
-  );
-  let labels = get_labels(
-    context.repo.owner,
-    context.repo.repo,
-    context.payload.issue?.number
-  );
+  try{
+    let cfg = get_config(
+      core.getInput("type").toLowerCase(),
+      core.getInput("path")
+    );
+    let labels = get_labels(
+      context.repo.owner,
+      context.repo.repo,
+      context.payload.issue?.number
+    );
+  } catch (error: any){
+    core.error(error)
+    core.setFailed(error.message)
+  }
 }
