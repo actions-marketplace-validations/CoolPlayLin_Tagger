@@ -21,7 +21,7 @@ jobs:
        git config --global user.email "130831920+coolplaylinbot@users.noreply.github.com"
        git config --global user.name "coolplaylinbot"
     - name: Delete
-      if: github.event_name == 'schedule'
+      if: github.event_name != 'push'
       run: |
        if [ -d "dist" ]; then
        rm -rf "dist"
@@ -33,7 +33,7 @@ jobs:
     - name: Install dependencies
       run: npm install
     - name: Build
-      if: github.event_name == 'schedule'
+      if: github.event_name != 'push'
       run: npm run build
     - name: Format
       run: npm run format:w
