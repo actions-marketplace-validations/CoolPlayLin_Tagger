@@ -12,9 +12,6 @@ var github = new Octokit({
   baseUrl: "https://api.github.com",
   userAgent: `Tagger ${__version__}`,
 });
-declare global {
-  let cfg: any;
-}
 
 async function get_config(
   type: string,
@@ -66,43 +63,47 @@ async function get_config(
       indeterminate_tag: input.indeterminate_tag,
     };
   }
+
+  return {
+    template: [],
+    type: "",
+    indeterminate_tag: ""
+  }
 }
 
-function get_labels(
-  owner: string,
-  repo: string,
-  issue_number: number | undefined
-): Array<string> {
-  if (typeof issue_number == "number") {
-    github.rest.issues
-      .get({
-        owner: owner,
-        repo: repo,
-        issue_number: issue_number,
-      })
-      .then((obj) => {
-        return obj.data.labels.map(function (tag) {
-          if (typeof tag == "string") {
-            return tag;
-          } else {
-            return tag.name;
-          }
-        });
-      });
-  } else {
-    let error = TypeError;
-    throw error;
-  }
-  return [];
-}
+// function get_labels(
+//   owner: string,
+//   repo: string,
+//   issue_number: number | undefined
+// ): Array<string> {
+//   if (typeof issue_number == "number") {
+//     github.rest.issues
+//       .get({
+//         owner: owner,
+//         repo: repo,
+//         issue_number: issue_number,
+//       })
+//       .then((obj) => {
+//         return obj.data.labels.map(function (tag) {
+//           if (typeof tag == "string") {
+//             return tag;
+//           } else {
+//             return tag.name;
+//           }
+//         });
+//       });
+//   } else {
+//     let error = TypeError;
+//     throw error;
+//   }
+//   return [];
+// }
 
 class Tagger {
   private config;
-  private labels;
 
-  constructor(config: t.config, labels: Array<string>) {
+  constructor(config: any) {
     this.config = config;
-    this.labels = labels;
   }
   pr = context.payload.pull_request;
 
@@ -175,23 +176,17 @@ export function main() {
       core.getInput("path"),
       core.getInput("indeterminate_tag")
     ).then((obj) => {
-      cfg = obj;
-    });
-    let labels = get_labels(
-      context.repo.owner,
-      context.repo.repo,
-      context.payload.issue?.number
-    );
-    const tagger = new Tagger(cfg, labels);
+      const tagger = new Tagger(obj);
 
-    switch (cfg.type) {
-      case "pull_request":
-        tagger.pr_label();
-        break;
-      case "issue":
-        tagger.issue_label();
-        break;
-    }
+      switch (obj.type) {
+        case "pull_request":
+          tagger.pr_label();
+          break;
+        case "issue":
+          tagger.issue_label();
+          break;
+      }
+    });
   } catch (error: any) {
     core.error(error);
     core.setFailed(error.message);
